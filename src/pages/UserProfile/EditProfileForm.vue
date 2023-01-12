@@ -7,9 +7,9 @@
         <div class="col-md-12">
           <div class="form-group">
             <label>About Me</label>
-            <textarea rows="5" class="form-control border-input"
+            <textarea rows="5" class="form-control border-input" id="content"
                       placeholder="Here can be your description"
-                      v-model="user.aboutMe">
+                      v-model="user.aboutMe" @input="sendText">
               </textarea>
           </div>
         </div>
@@ -24,6 +24,10 @@
         <div class="col-md-12">
           <div class="form-group">
             <label>Results</label>
+            <p> Origin: <span id = "origin"></span></p>
+            <p> Sensitive: <span id = "sensitive"></span></p>
+            <span></span>
+            <div class="placeholder" contenteditable="false"> {{autoComplete}}</div>
           </div>
         </div>
       </div>
@@ -35,7 +39,7 @@
 </template>
 <script>
   import Card from 'src/components/Cards/Card.vue'
-
+  import axios from 'axios'
   export default {
     components: {
       Card
@@ -57,8 +61,24 @@
       }
     },
     methods: {
-      updateProfile () {
-        alert('Your data: ' + JSON.stringify(this.user))
+      async updateProfile (e) {
+        // alert('Your data: ' + JSON.stringify(this.user))
+        // console.log('Your data: ' + JSON.stringify(this.user))
+        var content = document.getElementById("content").value
+        // const formData = new FormData();
+        // formData.append("text",content);
+
+        await  axios
+        .get("http://10.10.1.15:10020/predict-text/", {params: {
+          text: content
+        }})
+        .then(async (res) => {
+            console.log(res.data.Original )
+            console.log(res.data.Sensitive)
+            document.getElementById('origin').innerHTML =res.data.Original;
+            document.getElementById('sensitive').innerHTML = (res.data.Sensitive ==0) ? "False" : "True";
+        })
+        .catch((err) =>console.log(err))
       }
     }
   }
